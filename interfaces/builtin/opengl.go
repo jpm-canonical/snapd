@@ -99,7 +99,7 @@ const openglConnectedPlugAppArmor = `
 /var/lib/snapd/lib/system/gpu/{,**} rm,
 
 # GPU libraries exported by WSL2
-/lib/usr/wsl/{,**} rm,
+/usr/lib/wsl/{,**} rm,
 
 # Allow access to all cards since a) this is common on hybrid systems, b) ARM
 # devices commonly have two devices (such as on the Raspberry Pi 4, one for KMS
