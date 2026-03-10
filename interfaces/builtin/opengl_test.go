@@ -87,6 +87,7 @@ func (s *OpenglInterfaceSuite) TestAppArmorSpec(c *C) {
 	tmpdir := c.MkDir()
 	dirs.SetRootDir(tmpdir)
 	c.Assert(os.MkdirAll(filepath.Join(tmpdir, "/usr/share/nvidia"), 0777), IsNil)
+	c.Assert(os.MkdirAll(filepath.Join(tmpdir, "/usr/lib/wsl"), 0777), IsNil)
 
 	appSet, err := interfaces.NewSnapAppSet(s.plug.Snap(), nil)
 	c.Assert(err, IsNil)
@@ -111,6 +112,11 @@ func (s *OpenglInterfaceSuite) TestAppArmorSpec(c *C) {
 	mount options=(bind) /var/lib/snapd/hostfs%s/usr/share/nvidia/ -> /usr/share/nvidia/,
 	remount options=(bind, ro) /usr/share/nvidia/,
 	umount /usr/share/nvidia/,
+`, tmpdir))
+
+	c.Check(updateNS, testutil.Contains, fmt.Sprintf(`	# Read-only access to WSL libs in /usr/lib/wsl
+	mount options=(rbind) /var/lib/snapd/hostfs%s/usr/lib/wsl/ -> /usr/lib/wsl/,
+	umount /usr/lib/wsl/,
 `, tmpdir))
 }
 
