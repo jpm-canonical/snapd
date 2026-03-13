@@ -288,7 +288,7 @@ func (iface *openglInterface) AppArmorConnectedPlug(spec *apparmor.Specification
 	// Allow recursively bind mounting the wsl directory
 	hostWslDir := filepath.Join(dirs.GlobalRootDir, wslDirInHostNs)
 	if osutil.IsDirectory(hostWslDir) {
-		spec.AddUpdateNSf(`	# Read-only access to WSL libs in %[2]s
+		spec.AddUpdateNSf(`	# Access to WSL libs in %[2]s
 	mount options=(rbind) /var/lib/snapd/hostfs%[1]s/ -> %[2]s/,
 	umount %[2]s/,
 `, hostWslDir, wslDirInMountNs)
@@ -316,10 +316,11 @@ func (iface *openglInterface) MountConnectedPlug(spec *mount.Specification, plug
 	}
 
 	/*
-		This mounts the /usr/lib/wsl directory from the hostfs to the expected location inside snap.
-		Recursive bind mount is required as the wsl directory contains more bind mounts inside it.
-		Read-only is excluded from the mount options, as it does not work along with the rbind option.
-		This is ok, as the apparmor profile already limits this path to only read/mmap-execute.
+			This mounts the /usr/lib/wsl directory from the hostfs to the expected location inside the snap.
+			A recursive bind mount is required because the wsl directory itself contains additional mounts.
+			The `ro` option can not be specified along with the `rbind` option, and is therefore omitted.
+			The apparmor profile should limit this path to only read/mmap-execute, but AppArmor is not currently active in wsl2.
+		    On wsl2, this directory is therefore writable by the root user in the snap.
 	*/
 	hostWslDir := filepath.Join(dirs.GlobalRootDir, wslDirInHostNs)
 	if osutil.IsDirectory(hostWslDir) {
